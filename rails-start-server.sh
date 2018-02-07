@@ -8,6 +8,10 @@ read APP_DOMAIN || APP_DOMAIN=example.com
 echo -e "Please enter a secret key, generate it with 'rake secret' in your local machine: "
 read APP_SECRET_KEY || APP_SECRET_KEY="0e37b086b9cb86cb9bee85228ed631bc55c76292adfc005adafa659574e1856d6e45dd4f224bee0e53473c072f31700f644484a91e35ca2baf120b280f115e90"
 
+
+PRODUCTION_DB_NAME=$APP_NAME"_production"
+STAGING_DB_NAME=$APP_NAME"_staging"
+
 sudo sed -i -e '/^Port/s/^.*$/Port 22/' /etc/ssh/sshd_config
 sudo sed -i -e '/^PermitRootLogin/s/^.*$/PermitRootLogin no/' /etc/ssh/sshd_config
 sudo sed -i -e '$aAllowUsers deploy' /etc/ssh/sshd_config
@@ -33,8 +37,8 @@ rbenv rehash
 sudo sed -i -e 's|# include /etc/nginx/passenger.conf|include /etc/nginx/passenger.conf|' /etc/nginx/nginx.conf
 sudo sed -i -e 's|/usr/bin/passenger_free_ruby|/home/deploy/.rbenv/shims/ruby|' /etc/nginx/passenger.conf
 sudo -u postgres createuser deploy
-sudo -u postgres createdb -O deploy $APP_NAME+="_production"
-sudo -u postgres createdb -O deploy $APP_NAME+="_staging"
+sudo -u postgres createdb -O deploy $PRODUCTION_DB_NAME
+sudo -u postgres createdb -O deploy $STAGING_DB_NAME
 sudo touch /etc/nginx/sites-enabled/$APP_NAME
 sudo dd of=/etc/nginx/sites-enabled/$APP_NAME << EOF
 server {
@@ -62,9 +66,14 @@ mkdir -p /home/deploy/$APP_NAME/shared/config
 cat > /home/deploy/$APP_NAME/shared/config/database.yml <<EOF
 production:
   adapter: postgresql
-  database: $APP_DB_NAME
+  database: $PRODUCTION_DB_NAME
   encoding: unicode
   pool: 5
+staging:
+  adapter: postgresql
+  database: $STAGING_DB_NAME
+  encoding: unicode
+  pool: 5  
 EOF
 cat > /home/deploy/$APP_NAME/shared/config/secrets.yml <<EOF
 production:
