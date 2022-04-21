@@ -56,7 +56,7 @@ server {
         root         /home/deploy/$APP_NAME/current/public;
 
         location /cable {
-            passenger_app_group_name $APP_NAME_websocket;
+            passenger_app_group_name $APP_NAME-websocket;
             passenger_force_max_concurrent_requests_per_process 0;
         }
 
