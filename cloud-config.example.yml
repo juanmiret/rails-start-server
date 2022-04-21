@@ -1,0 +1,10 @@
+#cloud-config
+users:
+  - name: deploy
+    groups: sudo app db web
+    shell: /bin/bash
+    sudo: ['ALL=(ALL) NOPASSWD:ALL']
+    lock-passwd: False
+    passwd: password
+    ssh-authorized-keys:
+      - ssh-rsa AAAAB3NzaC1yc2Z75bzjMPiV1aVVI juanmiret@Juans-MacBook-Air.local
