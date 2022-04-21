@@ -39,8 +39,8 @@ rbenv global 3.1.2
 echo "gem: --no-document" > ~/.gemrc
 gem install bundler
 rbenv rehash
-sudo sed -i -e 's|# include /etc/nginx/passenger.conf|include /etc/nginx/passenger.conf|' /etc/nginx/nginx.conf
-sudo sed -i -e 's|/usr/bin/passenger_free_ruby|/home/deploy/.rbenv/shims/ruby|' /etc/nginx/passenger.conf
+sudo sed -i -e 's|/usr/bin/passenger_free_ruby|/home/deploy/.rbenv/shims/ruby|' /etc/nginx/conf.d/mod-http-passenger.conf
+sudo rm /etc/nginx/sites-enabled/default
 sudo -u postgres createuser deploy
 sudo -u postgres createdb -O deploy $PRODUCTION_DB_NAME
 sudo -u postgres createdb -O deploy $STAGING_DB_NAME
@@ -53,7 +53,6 @@ server {
         server_name $APP_DOMAIN;
         passenger_enabled on;
         passenger_app_env production;
-        rails_env    production;
         root         /home/deploy/$APP_NAME/current/public;
 
         location /cable {
@@ -66,12 +65,6 @@ server {
         location ~ ^/(assets|packs) {
           expires max;
           gzip_static on;
-        }
-
-        # redirect server error pages to the static page /50x.html
-        error_page   500 502 503 504  /50x.html;
-        location = /50x.html {
-            root   html;
         }
 }
 EOF
